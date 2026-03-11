@@ -2,6 +2,7 @@ package tui
 
 import (
 	"strings"
+	"sync"
 
 	"github.com/NitorCreations/tai/internal/copilot"
 	tea "github.com/charmbracelet/bubbletea"
@@ -11,18 +12,32 @@ import (
 // ─── Styles ────────────────────────────────────────────────────────────────────
 
 var (
-	cyanBold = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("14"))
-	gray     = lipgloss.NewStyle().Foreground(lipgloss.Color("245"))
-	dimGray  = lipgloss.NewStyle().Foreground(lipgloss.Color("245")).Faint(true)
-	red      = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
-	cyan     = lipgloss.NewStyle().Foreground(lipgloss.Color("14"))
-	selected = lipgloss.NewStyle().Foreground(lipgloss.Color("14"))
-	normal   = lipgloss.NewStyle()
+	styleOnce sync.Once
+	cyanBold  lipgloss.Style
+	gray      lipgloss.Style
+	dimGray   lipgloss.Style
+	red       lipgloss.Style
+	cyan      lipgloss.Style
+	selected  lipgloss.Style
+	normal    lipgloss.Style
 )
+
+func initStyles() {
+	styleOnce.Do(func() {
+		cyanBold = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("14"))
+		gray = lipgloss.NewStyle().Foreground(lipgloss.Color("245"))
+		dimGray = lipgloss.NewStyle().Foreground(lipgloss.Color("245")).Faint(true)
+		red = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
+		cyan = lipgloss.NewStyle().Foreground(lipgloss.Color("14"))
+		selected = lipgloss.NewStyle().Foreground(lipgloss.Color("14"))
+		normal = lipgloss.NewStyle()
+	})
+}
 
 // ─── View ──────────────────────────────────────────────────────────────────────
 
 func (m Model) View() string {
+	initStyles()
 	var lines []string
 
 	// Header

@@ -10,6 +10,7 @@ import (
 	"github.com/NitorCreations/tai/internal/config"
 	tui "github.com/NitorCreations/tai/internal/tui"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
 )
 
@@ -58,6 +59,8 @@ func runTUI(initialQuery string) int {
 		return 1
 	}
 	defer ttyFile.Close()
+
+	lipgloss.SetDefaultRenderer(lipgloss.NewRenderer(ttyFile))
 
 	restoreStderr := func() {}
 	if restore, err := RedirectStderrToNull(); err == nil {
