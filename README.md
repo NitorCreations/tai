@@ -16,21 +16,9 @@ curl -fsSL https://raw.githubusercontent.com/NitorCreations/tai/main/install.sh 
 
 The binary is placed at `~/.local/share/tai/tai`.
 
-### Shell integration (recommended)
+### Add to PATH
 
-The shell integration shim lets tai place commands directly into your shell history and prompt line instead of executing them in a subshell:
-
-```sh
-~/.local/share/tai/tai install          # auto-detects bash or zsh
-~/.local/share/tai/tai install bash     # explicit
-~/.local/share/tai/tai install zsh      # explicit
-```
-
-This writes a shim script to `~/.local/bin/tai`. Bind it to a key (e.g. `Alt+t`) for quick access from anywhere in the terminal.
-
-### Alternative: add binary to PATH
-
-If you prefer not to use the shell integration, add the install directory to your PATH instead:
+Add the install directory to your PATH so you can run `tai` directly:
 
 ```sh
 export PATH="$HOME/.local/share/tai:$PATH"
@@ -38,14 +26,26 @@ export PATH="$HOME/.local/share/tai:$PATH"
 
 Add this to `~/.bashrc` or `~/.zshrc` to make it permanent.
 
+### Shell keybinding widget (optional)
+
+`tai-widget` is a helper script that lets tai place commands directly into your shell prompt line instead of executing them in a subshell. Install it with:
+
+```sh
+tai install          # auto-detects bash or zsh
+tai install bash     # explicit
+tai install zsh      # explicit
+```
+
+This writes `tai-widget` to `~/.local/bin/`. Bind it to a key (e.g. `Alt+t`) for quick access from anywhere in the terminal.
+
 ### Tab completions (optional)
 
 ```sh
 # bash
-~/.local/share/tai/tai completion bash >> ~/.bashrc
+tai completion bash >> ~/.bashrc
 
 # zsh
-~/.local/share/tai/tai completion zsh >> ~/.zshrc
+tai completion zsh >> ~/.zshrc
 ```
 
 ## Usage
