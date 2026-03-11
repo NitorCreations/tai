@@ -1,0 +1,48 @@
+version: 2
+
+project_name: tai
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: tai
+    main: ./cmd/tai/
+    binary: tai
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X github.com/NitorCreations/tai/internal/cli.Version={{.Version}}
+    flags:
+      - -trimpath
+
+archives:
+  - id: tai
+    name_template: "tai_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    formats:
+      - tar.gz
+    files:
+      - none*
+
+checksum:
+  name_template: "tai_{{ .Version }}_checksums.txt"
+
+release:
+  github:
+    owner: NitorCreations
+    name: tai
+  draft: false
+  prerelease: auto
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
