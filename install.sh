@@ -54,8 +54,8 @@ OS=$(detect_os)
 ARCH=$(detect_arch)
 VERSION=$(latest_version)
 
-# goreleaser archive name template: tai_VERSION_OS_ARCH.tar.gz
-ARCHIVE="tai_${VERSION}_${OS}_${ARCH}.tar.gz"
+# goreleaser archive name template: tai_VERSION_OS_ARCH.tar.gz (version without "v" prefix)
+ARCHIVE="tai_${VERSION#v}_${OS}_${ARCH}.tar.gz"
 DOWNLOAD_URL="https://github.com/${REPO}/releases/download/${VERSION}/${ARCHIVE}"
 
 printf 'Installing tai %s (%s/%s)...\n' "$VERSION" "$OS" "$ARCH"
