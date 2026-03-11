@@ -1,12 +1,11 @@
 #!/usr/bin/env sh
 # tai install/update script
 # Downloads the latest tai binary from GitHub Releases and installs it to
-# ~/.local/share/tai/tai, then creates a symlink at ~/.local/bin/tai.
+# ~/.local/share/tai/tai.
 set -eu
 
 REPO="NitorCreations/tai"
 INSTALL_DIR="${HOME}/.local/share/tai"
-BIN_DIR="${HOME}/.local/bin"
 BINARY_NAME="tai"
 
 # ── helpers ──────────────────────────────────────────────────────────────────
@@ -82,19 +81,19 @@ printf '\ntai %s installed to %s\n' "$VERSION" "${INSTALL_DIR}/${BINARY_NAME}"
 printf '\n'
 printf 'Next steps:\n'
 printf '\n'
-printf '  Install shell integration (recommended):\n'
-printf '  This sets up a shim at ~/.local/bin/tai that places commands into\n'
-printf '  your shell prompt instead of running them immediately:\n'
-printf '\n'
-printf '       %s install bash    # or: %s install zsh\n' "${INSTALL_DIR}/${BINARY_NAME}" "${INSTALL_DIR}/${BINARY_NAME}"
-printf '\n'
-printf '  Alternatively, add the install directory to your PATH:\n'
+printf '  1. Add tai to your PATH:\n'
 printf '       export PATH="%s:$PATH"\n' "$INSTALL_DIR"
 printf '  Add this line to ~/.bashrc or ~/.zshrc to make it permanent.\n'
 printf '\n'
-printf '  Enable tab completions (optional):\n'
-printf '       %s completion bash >> ~/.bashrc\n' "${INSTALL_DIR}/${BINARY_NAME}"
-printf '       %s completion zsh  >> ~/.zshrc\n' "${INSTALL_DIR}/${BINARY_NAME}"
+printf '  2. Install shell keybinding widget (optional):\n'
+printf '  This creates tai-widget at ~/.local/bin for use with a shell keybinding.\n'
+printf '  It lets you select a command interactively and inject it into your prompt:\n'
 printf '\n'
-printf '  Reload your shell:\n'
+printf '       tai install bash    # or: tai install zsh\n'
+printf '\n'
+printf '  3. Enable tab completions (optional):\n'
+printf '       tai completion bash >> ~/.bashrc\n'
+printf '       tai completion zsh  >> ~/.zshrc\n'
+printf '\n'
+printf '  4. Reload your shell:\n'
 printf '       exec $SHELL\n'
