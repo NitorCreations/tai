@@ -12,14 +12,15 @@ import (
 // ─── Styles ────────────────────────────────────────────────────────────────────
 
 var (
-	styleOnce sync.Once
-	cyanBold  lipgloss.Style
-	gray      lipgloss.Style
-	dimGray   lipgloss.Style
-	red       lipgloss.Style
-	cyan      lipgloss.Style
-	selected  lipgloss.Style
-	normal    lipgloss.Style
+	styleOnce    sync.Once
+	cyanBold     lipgloss.Style
+	gray         lipgloss.Style
+	dimGray      lipgloss.Style
+	red          lipgloss.Style
+	cyan         lipgloss.Style
+	selected     lipgloss.Style
+	normal       lipgloss.Style
+	notInstalled lipgloss.Style
 )
 
 func initStyles() {
@@ -31,6 +32,7 @@ func initStyles() {
 		cyan = lipgloss.NewStyle().Foreground(lipgloss.Color("14"))
 		selected = lipgloss.NewStyle().Foreground(lipgloss.Color("14"))
 		normal = lipgloss.NewStyle()
+		notInstalled = lipgloss.NewStyle().Foreground(lipgloss.Color("245")).Faint(true)
 	})
 }
 
@@ -79,7 +81,7 @@ func (m Model) View() string {
 
 	// Footer
 	lines = append(lines, sep)
-	lines = append(lines, renderFooter(m.state))
+	lines = append(lines, renderFooter(m.state, m.commands, m.selectedIdx))
 
 	body := strings.Join(lines, "\n")
 
@@ -114,13 +116,20 @@ func renderCommands(commands []copilot.Command, selectedIdx int) string {
 	var lines []string
 	for i, cmd := range commands {
 		var line string
-		if i == selectedIdx {
+		if i == selectedIdx && !cmd.Available {
+			line = notInstalled.Render("❯ " + cmd.Command)
+		} else if i == selectedIdx {
 			line = selected.Render("❯ " + cmd.Command)
+		} else if !cmd.Available {
+			line = notInstalled.Render("  " + cmd.Command)
 		} else {
 			line = normal.Render("  " + cmd.Command)
 		}
 		if cmd.Destructive {
 			line += " " + red.Render("⚠ destructive")
+		}
+		if !cmd.Available {
+			line += " " + notInstalled.Render("✘ not installed")
 		}
 		lines = append(lines, line)
 		lines = append(lines, dimGray.Render("    "+cmd.Description))
@@ -128,10 +137,15 @@ func renderCommands(commands []copilot.Command, selectedIdx int) string {
 	return strings.Join(lines, "\n")
 }
 
-func renderFooter(state appState) string {
+func renderFooter(state appState, commands []copilot.Command, selectedIdx int) string {
 	switch state {
 	case stateResults:
-		return dimGray.Render("[↑↓] Navigate  [Enter] Run  [Tab] Edit  [/] Refine  [Ctrl+C] Cancel")
+		footer := "[↑↓] Navigate  [Enter] Run  [Tab] Edit  [/] Refine"
+		if selectedIdx < len(commands) && !commands[selectedIdx].Available {
+			footer += "  [x] Re-query"
+		}
+		footer += "  [Ctrl+C] Cancel"
+		return dimGray.Render(footer)
 	case stateInput:
 		return dimGray.Render("[Enter] Submit  [Ctrl+C] Cancel")
 	case stateEditing:

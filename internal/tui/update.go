@@ -2,6 +2,9 @@ package tui
 
 import (
 	"context"
+	"fmt"
+	"os/exec"
+	"sort"
 	"strings"
 	"unicode/utf8"
 
@@ -9,6 +12,62 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 )
+
+// ─── Availability checking ─────────────────────────────────────────────────────
+
+var shellBuiltins = map[string]bool{
+	"cd": true, "echo": true, "export": true, "source": true,
+	"alias": true, "unset": true, "set": true, "read": true,
+	"printf": true, "test": true, "[": true, "true": true, "false": true,
+}
+
+// wrapperCommands are prefixes that delegate to another binary (the real
+// binary to check is the next non-flag word after the wrapper).
+var wrapperCommands = map[string]bool{
+	"sudo": true, "env": true, "time": true, "nice": true,
+	"nohup": true, "watch": true,
+}
+
+// effectiveBinary extracts the binary that must be in PATH for the command
+// to work. Handles plain commands as well as wrapper-prefixed ones like
+// "sudo lsof -i" or "sudo -n lsof -i" (returns "lsof").
+// Known limitation: "sudo -u user cmd" will incorrectly resolve to "user".
+func effectiveBinary(fields []string) string {
+	if len(fields) == 0 {
+		return ""
+	}
+	if !wrapperCommands[fields[0]] {
+		return fields[0]
+	}
+	for _, f := range fields[1:] {
+		if strings.HasPrefix(f, "-") || strings.Contains(f, "=") {
+			continue
+		}
+		return f
+	}
+	return fields[0]
+}
+
+func checkAndSortCommands(commands []copilot.Command) []copilot.Command {
+	for i := range commands {
+		fields := strings.Fields(commands[i].Command)
+		binary := effectiveBinary(fields)
+		if binary == "" {
+			commands[i].Available = false
+			continue
+		}
+		if shellBuiltins[binary] {
+			commands[i].Available = true
+			continue
+		}
+		_, err := exec.LookPath(binary)
+		commands[i].Available = (err == nil)
+	}
+	sort.SliceStable(commands, func(i, j int) bool {
+		return commands[i].Available && !commands[j].Available
+	})
+	return commands
+}
 
 // ─── Update ────────────────────────────────────────────────────────────────────
 
@@ -28,7 +87,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case CommandsMsg:
 		m.state = stateResults
-		m.commands = msg.Commands
+		m.commands = checkAndSortCommands(msg.Commands)
 		m.selectedIdx = 0
 		m.inputVal = ""
 		m.inputCursor = 0
@@ -100,10 +159,27 @@ func (m Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 				m.state = stateEditing
 			}
 		case tea.KeyRunes:
-			if msg.String() == "/" {
+			switch msg.String() {
+			case "/":
 				m.inputVal = m.query
 				m.inputCursor = utf8.RuneCountInString(m.inputVal)
 				m.state = stateFollowup
+			case "x":
+				if m.selectedIdx < len(m.commands) && !m.commands[m.selectedIdx].Available {
+					binary := effectiveBinary(strings.Fields(m.commands[m.selectedIdx].Command))
+					excludeQuery := fmt.Sprintf("suggest alternatives that do not use %s", binary)
+					newHistory := append(m.history, copilot.ConversationTurn{
+						Query:    m.query,
+						Commands: m.commands,
+					})
+					m.history = newHistory
+					m.query = excludeQuery
+					m.inputVal = ""
+					m.inputCursor = 0
+					m.state = stateLoading
+					m.resolvedModel = m.cfg.Model
+					return m, m.fetchCmd(excludeQuery, newHistory)
+				}
 			}
 		}
 

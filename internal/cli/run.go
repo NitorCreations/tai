@@ -41,7 +41,7 @@ Use "tai ask [query]" to open the interactive overlay.`,
 
 	rootCmd.AddCommand(askCmd)
 	rootCmd.AddCommand(configCmd())
-	rootCmd.AddCommand(installCmd())
+	rootCmd.AddCommand(widgetCmd())
 	rootCmd.AddCommand(versionCmd())
 
 	if err := rootCmd.Execute(); err != nil {
@@ -83,7 +83,7 @@ func runTUI(initialQuery string) int {
 
 	result := finalModel.(tui.Model)
 	if result.Accepted != "" {
-		if os.Getenv("TAI_SHIM") != "" {
+		if os.Getenv("TAI_WIDGET") != "" {
 			fmt.Fprint(os.Stdout, result.Accepted)
 			return 0
 		}

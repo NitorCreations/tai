@@ -28,25 +28,30 @@ Add this to `~/.bashrc` or `~/.zshrc` to make it permanent.
 
 ### Shell keybinding widget (optional)
 
-`tai-widget` is a helper script that lets tai place commands directly into your shell prompt line instead of executing them in a subshell. Install it with:
+`tai widget` prints a shell snippet that defines `_tai_widget` and binds it to `Ctrl+T`. The widget lets tai place a command directly into your prompt line (editable before running) instead of executing it immediately.
 
 ```sh
-tai install          # auto-detects bash or zsh
-tai install bash     # explicit
-tai install zsh      # explicit
+# Load into current shell (one-time)
+eval "$(tai widget)"          # auto-detects bash or zsh
+eval "$(tai widget bash)"     # explicit
+eval "$(tai widget zsh)"      # explicit
+
+# Override the default Ctrl+T binding
+eval "$(tai widget bash --key '\C-g')"
+eval "$(tai widget zsh  --key '^G')"
 ```
 
-This writes `tai-widget` to `~/.local/bin/`. Bind it to a key (e.g. `Alt+t`) for quick access from anywhere in the terminal.
+To persist across sessions, add the eval line to `~/.bashrc` or `~/.zshrc`.
 
 ### Tab completions (optional)
 
-```sh
-# bash
-tai completion bash >> ~/.bashrc
+To load in the current shell:
 
-# zsh
-tai completion zsh >> ~/.zshrc
+```sh
+eval "$(tai completion bash)"    # or: tai completion zsh
 ```
+
+To persist across sessions, add the same line to `~/.bashrc` or `~/.zshrc`.
 
 ## Usage
 

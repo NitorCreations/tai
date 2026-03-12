@@ -26,8 +26,14 @@ endif
 
 all: dist/$(BINARY)
 
+fmt:
+	$(GO) fmt ./...
+
 clean:
 	$(RM) -r dist
+
+install: all
+	install -Dm755 dist/$(BINARY) $(HOME)/.local/share/tai/tai
 
 dist/$(BINARY64): $(SOURCES)
 	GOARCH=amd64 $(GO) build $(BUILD_FLAGS) -o $@ ./cmd/tai/
@@ -35,12 +41,8 @@ dist/$(BINARY64): $(SOURCES)
 dist/$(BINARYARM8): $(SOURCES)
 	GOARCH=arm64 $(GO) build $(BUILD_FLAGS) -o $@ ./cmd/tai/
 
-dist/tai: dist/$(BINARY) | dist
-	rm -f dist/tai
-	cp -f dist/$(BINARY) dist/tai
-
 update:
 	$(GO) get -u ./...
 	$(GO) mod tidy
 
-.PHONY: all update
+.PHONY: all clean install update
