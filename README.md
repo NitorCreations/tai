@@ -1,8 +1,23 @@
 # tai — Terminal AI
 
-Generate shell commands from natural language, right in your terminal.
+You know the command. It does exactly what you need. You just can't remember it. `tai` does. It is for the commands you know exist but can't quite recall. Describe what you want in natural language, get the exact shell command back.
+
+![demo](assets/tai_demo.gif)
 
 tai uses your GitHub Copilot SDK to suggest commands. Select one, run it, or edit it before executing.
+
+## Features
+
+- **Natural language to shell command** — describe what you want, get back runnable commands
+- **Interactive TUI** — keyboard-driven list of suggestions, no mouse required
+- **Edit before running** — press `Tab` to tweak a command in-place before execution
+- **Follow-up queries** — press `/` to refine results with additional context; conversation history is preserved within the session
+- **Destructive command warnings** — commands like `rm` or `kill` are flagged with `⚠`
+- **Availability checking** — commands whose binary isn't installed are marked `✘ not installed` and sorted to the bottom
+- **Re-query without missing tools** — press `x` on an unavailable command to ask again, explicitly excluding that binary
+- **Shell widget** — bind tai to `Ctrl+T` so the chosen command lands in your prompt for editing instead of running immediately
+- **Bash and zsh support** — widget and tab completions work in both shells
+- **Configurable model** — switch the underlying Copilot model via `tai config set model <name>`
 
 ## Prerequisites
 
